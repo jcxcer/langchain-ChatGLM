@@ -49,7 +49,7 @@ def main():
         # 判断 filepath 是否为空，如果为空的话，重新让用户输入,防止用户误触回车
         if not filepath:
             continue
-        vs_path = "/var/pyproj/langchain-ChatGLM/history/"+file_hash+"/vs"
+        vs_path = "/var/pyproj/langchain-ChatGLM/history/"+file_hash+"/vs_"+EMBEDDING_MODEL
         vs_path, _ = local_doc_qa.init_knowledge_vector_store(filepath,vs_path=vs_path)
 
 
@@ -60,16 +60,20 @@ def main():
     last_print_len = 0
 
     print("output:")
-
-    for resp, history in local_doc_qa.get_knowledge_based_answer(query=query,
-                                                                 vs_path=vs_path,
-                                                                 chat_history=history,
-                                                                 streaming=STREAMING):
-        if STREAMING:
-            print(resp["result"][last_print_len:], end="", flush=True)
-            last_print_len = len(resp["result"])
-        else:
-            print(resp["result"])
+    if query=='OCR':
+        with open("/var/pyproj/langchain-ChatGLM/history/" + file_hash+"/files/tmp_files/"+file_name+".txt","r") as f:
+            txt = f.readlines()
+            print("".join(txt))
+    else:
+        for resp, history in local_doc_qa.get_knowledge_based_answer(query=query,
+                                                                     vs_path=vs_path,
+                                                                     chat_history=history,
+                                                                     streaming=STREAMING):
+            if STREAMING:
+                print(resp["result"][last_print_len:], end="", flush=True)
+                last_print_len = len(resp["result"])
+            else:
+                print(resp["result"])
 
 
 if __name__ == "__main__":
