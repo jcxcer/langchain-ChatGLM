@@ -25,33 +25,37 @@ def main():
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
     vs_path = None
-    while not vs_path:
-        # filepath = input("Input your local knowledge file path 请输入本地知识文件路径：")
-        file_url = sys.argv[2]
-        file_name = sys.argv[3]
-        file_content = requests.get(file_url)
-        file_hash = hashlib.md5(file_content.content).hexdigest()
-        if file_name=='':
-            file_name = os.path.basename(file_url)
 
-        filepath = "/var/pyproj/langchain-ChatGLM/history/" + file_hash+"/"
-        if not os.path.exists(filepath):
-            os.mkdir(filepath)
+    # filepath = input("Input your local knowledge file path 请输入本地知识文件路径：")
+    file_url = sys.argv[2]
+    file_name = sys.argv[3]
+    file_content = requests.get(file_url)
+    file_hash = hashlib.md5(file_content.content).hexdigest()
+    if file_name=='':
+        file_name = os.path.basename(file_url)
 
-        filepath += "files/"
-        if not os.path.exists(filepath):
-            os.mkdir(filepath)
+    filepath = "/var/pyproj/langchain-ChatGLM/history/" + file_hash+"/"
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
 
-        filepath += file_name
-        if not os.path.exists(filepath):
-            open(filepath, 'wb').write(file_content.content)
+    filepath += "files/"
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
 
-        # 判断 filepath 是否为空，如果为空的话，重新让用户输入,防止用户误触回车
-        if not filepath:
-            continue
-        vs_path = "/var/pyproj/langchain-ChatGLM/history/"+file_hash+"/vs_"+EMBEDDING_MODEL
-        vs_path, _ = local_doc_qa.init_knowledge_vector_store(filepath,vs_path=vs_path)
+    filepath += file_name
+    if not os.path.exists(filepath):
+        open(filepath, 'wb').write(file_content.content)
 
+    # 判断 filepath 是否为空，如果为空的话，重新让用户输入,防止用户误触回车
+    if not filepath:
+        return
+
+    vs_path = "/var/pyproj/langchain-ChatGLM/history/"+file_hash+"/vs_"+EMBEDDING_MODEL
+    vs_path, _ = local_doc_qa.init_knowledge_vector_store(filepath,vs_path=vs_path)
+
+    if not vs_path:
+        print('output:vs_path load error')
+        return
 
     history = []
 
