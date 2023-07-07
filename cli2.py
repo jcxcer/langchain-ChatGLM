@@ -24,17 +24,17 @@ def main():
                           embedding_model=EMBEDDING_MODEL,
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
-    vs_path = None
-
     # filepath = input("Input your local knowledge file path 请输入本地知识文件路径：")
-    file_url = sys.argv[2]
-    file_name = sys.argv[3]
+    query = sys.argv[1]
+    file_name = sys.argv[2]
+    file_url = sys.argv[3]
+
     file_content = requests.get(file_url)
     file_hash = hashlib.md5(file_content.content).hexdigest()
-    if file_name=='':
+    if file_name == '':
         file_name = os.path.basename(file_url)
 
-    filepath = "/var/pyproj/langchain-ChatGLM/history/" + file_hash+"/"
+    filepath = "/var/pyproj/langchain-ChatGLM/history/" + file_hash + "/"
     if not os.path.exists(filepath):
         os.mkdir(filepath)
 
@@ -60,7 +60,7 @@ def main():
     history = []
 
     # query = input("Input your question 请输入问题：")
-    query = sys.argv[1]
+
     last_print_len = 0
 
     print("output:")
