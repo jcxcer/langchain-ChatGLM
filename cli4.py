@@ -3,6 +3,7 @@ from chains.local_doc_qa import LocalDocQA
 import os
 import nltk
 import sys
+import json
 import hashlib
 import requests
 from models.loader.args import parser
@@ -25,10 +26,26 @@ def main():
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
 
-    query = sys.argv[1]
-    base = sys.argv[2]
+    # query = sys.argv[1]
+    # base = sys.argv[2]
 
-    vs_path = "/var/pyproj/langchain-ChatGLM/history/" + base + "/vs_" + EMBEDDING_MODEL
+    query_text = ''
+    query_base = ''
+
+    query_file = sys.argv[1]
+    if os.path.exists(f"/var/pyproj/langchain-ChatGLM/history/tmp/" + query_file):
+        with open(f"/var/pyproj/langchain-ChatGLM/history/tmp/" + query_file, "r", encoding="utf-8") as f:
+            query = f.read()
+            query = json.loads(query)
+
+            query_text = query["text"]
+            query_base = query["base"]
+
+    if query_text == '' or query_base == '':
+        print('output:query or base load error')
+        return
+
+    vs_path = "/var/pyproj/langchain-ChatGLM/history/" + query_base + "/vs_" + EMBEDDING_MODEL
     # vs_path, _ = local_doc_qa.init_knowledge_vector_store(filepath,vs_path=vs_path)
 
     if not vs_path:
@@ -43,7 +60,7 @@ def main():
 
     print("output:")
 
-    for resp, history in local_doc_qa.get_knowledge_based_answer(query=query,
+    for resp, history in local_doc_qa.get_knowledge_based_answer(query=query_text,
                                                                  vs_path=vs_path,
                                                                  chat_history=history,
                                                                  streaming=STREAMING):
