@@ -15,6 +15,22 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
 
+HISTORY_PATH = "/var/pyproj/langchain-ChatGLM/history"
+
+
+def saveHistory(conversation_key, history):
+    with open(f"{HISTORY_PATH}/{conversation_key}.txt", "w", encoding="utf-8") as f:
+        f.write(json.dumps(history, ensure_ascii=False))
+
+
+def loadHistory(conversation_key):
+    history = []
+    if os.path.exists(f"/{HISTORY_PATH}/{conversation_key}.txt"):
+        with open(f"{HISTORY_PATH}/{conversation_key}.txt", "r", encoding="utf-8") as f:
+            history = f.read()
+            history = json.loads(history)
+    return history
+
 
 def main():
     llm_model_ins = shared.loaderLLM()
@@ -33,8 +49,8 @@ def main():
     query_base = ''
 
     query_file = sys.argv[1]
-    if os.path.exists(f"/var/pyproj/langchain-ChatGLM/history/tmp/" + query_file):
-        with open(f"/var/pyproj/langchain-ChatGLM/history/tmp/" + query_file, "r", encoding="utf-8") as f:
+    if os.path.exists(f"{HISTORY_PATH}/tmp/" + query_file):
+        with open(f"{HISTORY_PATH}/tmp/" + query_file, "r", encoding="utf-8") as f:
             query = f.read()
             query = json.loads(query)
 
@@ -45,7 +61,7 @@ def main():
         print('output:query or base load error')
         return
 
-    vs_path = "/var/pyproj/langchain-ChatGLM/history/" + query_base + "/vs_" + EMBEDDING_MODEL
+    vs_path = f"{HISTORY_PATH}/" + query_base + "/vs_" + EMBEDDING_MODEL
     # vs_path, _ = local_doc_qa.init_knowledge_vector_store(filepath,vs_path=vs_path)
 
     if not vs_path:
