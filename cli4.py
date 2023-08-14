@@ -47,6 +47,7 @@ def main():
 
     query_text = ''
     query_base = ''
+    query_key = ''
 
     query_file = sys.argv[1]
     if os.path.exists(f"{HISTORY_PATH}/tmp/" + query_file):
@@ -56,6 +57,8 @@ def main():
 
             query_text = query["text"]
             query_base = query["base"]
+            if 'key' in query:
+                query_key = query["key"]
 
     if query_text == '' or query_base == '':
         print('output:query or base load error')
@@ -69,6 +72,8 @@ def main():
         return
 
     history = []
+    if query_key:
+        history = loadHistory(query_key)
 
     # query = input("Input your question 请输入问题：")
 
@@ -85,6 +90,9 @@ def main():
             last_print_len = len(resp["result"])
         else:
             print(resp["result"])
+
+        if query_key:
+            saveHistory(query_key, history)
 
 
 if __name__ == "__main__":
